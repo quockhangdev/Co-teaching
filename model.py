@@ -48,10 +48,15 @@ class CNN(nn.Module):
         self._init_classifier(self.backbone.classifier)
 
     def _insert_se_blocks(self):
-        for name in ["denseblock1", "denseblock2", "denseblock3", "denseblock4"]:
+        se_channels = {
+            "denseblock1": 256,
+            "denseblock2": 512,
+            "denseblock3": 1024,
+            "denseblock4": 1024  # trước transition4 (nếu dùng) sẽ giảm nữa
+        }
+        for name in se_channels:
             block = getattr(self.backbone.features, name)
-            out_channels = list(block.children())[-1].conv2.out_channels
-            se = SEBlock(out_channels)
+            se = SEBlock(se_channels[name])
             wrapped = nn.Sequential(block, se)
             setattr(self.backbone.features, name, wrapped)
 
