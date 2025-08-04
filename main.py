@@ -98,7 +98,7 @@ def train(epoch, loader, m1, m2, opt1, opt2, scaler,
         imgs, labs = imgs.to(device), labs.to(device)
         inds = idxs.cpu().numpy()
 
-        with autocast():
+        with autocast(device_type="cuda", enabled=torch.cuda.is_available()):
             out1 = m1(imgs); out2 = m2(imgs)
             p1 = accuracy(out1, labs)[0]; p2 = accuracy(out2, labs)[0]
             l1, l2, pr1, pr2 = loss_coteaching(
