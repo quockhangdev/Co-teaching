@@ -10,7 +10,7 @@ import torchvision.transforms as transforms
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 try:
-    from torch.cuda import autocast, GradScaler # type: ignore
+    from torch.amp import autocast, GradScaler # type: ignore
 except ImportError:
     from torch.amp.autocast_mode import autocast
     from torch.amp.grad_scaler import GradScaler
