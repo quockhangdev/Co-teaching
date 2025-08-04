@@ -12,7 +12,7 @@ export CUDA_VISIBLE_DEVICES=0
 DATASET="cxr"
 # NOISE_TYPE="symmetric"
 NOISE_TYPE="pairflip"
-NOISE_RATE=0.2
+NOISE_RATE=0.45
 BATCH_SIZE=16
 LR=1e-4
 EPOCHS=200
@@ -29,4 +29,6 @@ python main.py \
     --n_epoch $EPOCHS \
     --num_workers $WORKERS \
     --result_dir $RESULT_DIR \
-    --num_iter_per_epoch $NUM_ITER_PER_EPOCH
+    --num_iter_per_epoch $NUM_ITER_PER_EPOCH \
+    --T_0 3 \
+    --T_mult 1
