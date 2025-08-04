@@ -198,7 +198,7 @@ def main():
     parser.add_argument("--T_0", type=int, default=10)
     parser.add_argument("--T_mult", type=int, default=2)
     parser.add_argument(
-        "--label_smoothing", type=float, default=0.0, help="Label smoothing factor"
+        "--label_smoothing", type=float, default=0.1, help="Label smoothing factor"
     )
     args = parser.parse_args()
 
