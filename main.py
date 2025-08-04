@@ -7,6 +7,7 @@ from torch.autograd import Variable
 import torchvision.transforms as transforms
 from data.cifar import CIFAR10, CIFAR100
 from data.mnist import MNIST
+from data.cxr import CXR
 from model import CNN
 import argparse, sys
 import numpy as np
@@ -44,7 +45,7 @@ parser.add_argument(
 )
 parser.add_argument("--top_bn", action="store_true")
 parser.add_argument(
-    "--dataset", type=str, help="mnist, cifar10, or cifar100", default="mnist"
+    "--dataset", type=str, help="mnist, cifar10, or cifar100, cxr", default="cxr"
 )
 parser.add_argument("--n_epoch", type=int, default=200)
 parser.add_argument("--seed", type=int, default=1)
@@ -69,6 +70,27 @@ batch_size = 128
 learning_rate = args.lr
 
 # load dataset
+if args.dataset == "cxr":
+    input_channel = 3
+    num_classes = 12
+    args.top_bn = False
+    args.epoch_decay_start = 80
+    args.n_epoch = 200
+    train_dataset = CXR(
+        root="/Users/quockhang/Documents/dev/Data-Yte-AG/img_xray",
+        train=True,
+        transform=transforms.ToTensor(),
+        noise_type=args.noise_type,
+        noise_rate=args.noise_rate,
+    )
+    test_dataset = CXR(
+        root="/Users/quockhang/Documents/dev/Data-Yte-AG/img_xray",
+        train=False,
+        transform=transforms.ToTensor(),
+        noise_type=args.noise_type,
+        noise_rate=args.noise_rate,
+    )
+
 if args.dataset == "mnist":
     input_channel = 1
     num_classes = 10
