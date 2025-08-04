@@ -111,17 +111,20 @@ if os.path.exists(txtfile):
 
 
 def accuracy(logit, target, topk=(1,)):
+    # Ensure target shape is [batch_size]
+    if target.ndim == 2 and target.size(1) == 1:
+        target = target.squeeze(1)
+    elif target.ndim > 1:
+        target = target.argmax(dim=1)  # if one-hot
+
     _, pred = logit.topk(max(topk), 1, True, True)
-    correct = pred.t().eq(target.view(1, -1).expand_as(pred))
+    pred = pred.t()
+    correct = pred.eq(target.view(1, -1).expand_as(pred))
 
-    print(f"logit shape: {logit.shape}")
-    print(f"target shape: {target.shape}")
-    print(f"pred shape: {pred.shape}")
-
-    res = [
-        correct[:k].reshape(-1).float().sum(0).mul_(100.0 / target.size(0))
-        for k in topk
-    ]
+    res = []
+    for k in topk:
+        correct_k = correct[:k].reshape(-1).float().sum(0)
+        res.append(correct_k.mul_(100.0 / target.size(0)))
     return res
 
 
