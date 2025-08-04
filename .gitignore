@@ -1,0 +1,8 @@
+__pycache__
+results/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.db
+*.sqlite3
