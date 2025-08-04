@@ -11,6 +11,7 @@ import argparse
 import numpy as np
 import datetime
 from loss import loss_coteaching
+from torch.cuda.amp import autocast, GradScaler
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--lr", type=float, default=0.001)
@@ -104,7 +105,7 @@ def accuracy(logit, target, topk=(1,)):
     return res
 
 
-def train(train_loader, epoch, model1, optimizer1, model2, optimizer2):
+def train(train_loader, epoch, model1, optimizer1, model2, optimizer2, scaler):
     model1.train()
     model2.train()
 
@@ -120,28 +121,33 @@ def train(train_loader, epoch, model1, optimizer1, model2, optimizer2):
         )
         ind = indexes.cpu().numpy().transpose()
 
-        logits1 = model1(images)
-        prec1 = accuracy(logits1, labels, topk=(1,))[0]
-        train_total += 1
-        train_correct += prec1.item()
+        with autocast(device_type="cuda"):
+            logits1 = model1(images)
+            prec1 = accuracy(logits1, labels, topk=(1,))[0]
+            train_total += 1
+            train_correct += prec1.item()
 
-        logits2 = model2(images)
-        prec2 = accuracy(logits2, labels, topk=(1,))[0]
-        train_total2 += 1
-        train_correct2 += prec2.item()
+            logits2 = model2(images)
+            prec2 = accuracy(logits2, labels, topk=(1,))[0]
+            train_total2 += 1
+            train_correct2 += prec2.item()
 
-        loss_1, loss_2, pr1, pr2 = loss_coteaching(
-            logits1, logits2, labels, rate_schedule[epoch], ind, noise_or_not
-        )
+            loss_1, loss_2, pr1, pr2 = loss_coteaching(
+                logits1, logits2, labels, rate_schedule[epoch], ind, noise_or_not
+            )
+
         pure_ratio_1_list.append(100 * pr1)
         pure_ratio_2_list.append(100 * pr2)
 
         optimizer1.zero_grad()
-        loss_1.backward()
-        optimizer1.step()
+        scaler.scale(loss_1).backward()
+        scaler.step(optimizer1)
+
         optimizer2.zero_grad()
-        loss_2.backward()
-        optimizer2.step()
+        scaler.scale(loss_2).backward()
+        scaler.step(optimizer2)
+
+        scaler.update()
 
         if (i + 1) % args.print_freq == 0:
             print(
@@ -202,6 +208,7 @@ def main():
     cnn2 = CNN(input_channel=input_channel, n_outputs=num_classes).to(device)
     optimizer1 = torch.optim.Adam(cnn1.parameters(), lr=args.lr)
     optimizer2 = torch.optim.Adam(cnn2.parameters(), lr=args.lr)
+    scaler = GradScaler()
 
     with open(txtfile, "a") as f:
         f.write(
@@ -220,7 +227,7 @@ def main():
         adjust_learning_rate(optimizer1, epoch)
         adjust_learning_rate(optimizer2, epoch)
         train_acc1, train_acc2, pr1_list, pr2_list = train(
-            train_loader, epoch, cnn1, optimizer1, cnn2, optimizer2
+            train_loader, epoch, cnn1, optimizer1, cnn2, optimizer2, scaler
         )
 
         torch.cuda.empty_cache()

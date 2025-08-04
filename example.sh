@@ -1,1 +1,28 @@
-python main.py --dataset cxr --noise_type symmetric --noise_rate 0.2
+#!/bin/bash
+
+# Enable memory optimization for PyTorch (recommended for large models)
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+# Set visible GPU (optional: only if using multi-GPU setups)
+export CUDA_VISIBLE_DEVICES=0
+
+# Define arguments
+DATASET="cxr"
+NOISE_TYPE="symmetric"
+NOISE_RATE=0.2
+BATCH_SIZE=16
+LR=0.001
+EPOCHS=200
+WORKERS=16
+RESULT_DIR="results"
+
+# Run the training script with AMP
+python main.py \
+    --dataset $DATASET \
+    --noise_type $NOISE_TYPE \
+    --noise_rate $NOISE_RATE \
+    --batch_size $BATCH_SIZE \
+    --lr $LR \
+    --n_epoch $EPOCHS \
+    --num_workers $WORKERS \
+    --result_dir $RESULT_DIR
