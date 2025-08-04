@@ -11,7 +11,8 @@ import argparse
 import numpy as np
 import datetime
 from loss import loss_coteaching
-from torch.cuda.amp import autocast, GradScaler
+from torch.amp import autocast, GradScaler
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--lr", type=float, default=0.001)
@@ -113,7 +114,9 @@ def train(train_loader, epoch, model1, optimizer1, model2, optimizer2, scaler):
     train_total2, train_correct2 = 0, 0
     pure_ratio_1_list, pure_ratio_2_list = [], []
 
-    for i, (images, labels, indexes) in enumerate(train_loader):
+    for i, (images, labels, indexes) in tqdm(
+        enumerate(train_loader), total=len(train_loader)
+    ):
         if i > args.num_iter_per_epoch:
             break
         images, labels = images.to(device, non_blocking=True), labels.to(
@@ -167,7 +170,7 @@ def evaluate(test_loader, model1, model2):
     model2.eval()
     correct1 = correct2 = total = 0
     with torch.no_grad():
-        for images, labels, _ in test_loader:
+        for images, labels, _ in tqdm(test_loader, total=len(test_loader)):
             images, labels = images.to(device, non_blocking=True), labels.to(
                 device, non_blocking=True
             )
