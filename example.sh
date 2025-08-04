@@ -1,3 +1,5 @@
+# === Bash Run Script ===
+# Save this as run_cxr.sh and make executable (chmod +x run_cxr.sh)
 #!/bin/bash
 
 # Enable memory optimization for PyTorch (recommended for large models)
@@ -11,14 +13,13 @@ DATASET="cxr"
 NOISE_TYPE="symmetric"
 NOISE_RATE=0.2
 BATCH_SIZE=32
-LR=0.001
+LR=1e-4
 EPOCHS=200
 WORKERS=16
 RESULT_DIR="results"
 
 # Run the training script with AMP
 python main.py \
-    --dataset $DATASET \
     --noise_type $NOISE_TYPE \
     --noise_rate $NOISE_RATE \
     --batch_size $BATCH_SIZE \

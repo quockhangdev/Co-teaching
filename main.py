@@ -68,7 +68,7 @@ def train(
         labs = labs.to(device, non_blocking=True)
         inds = idxs.cpu().numpy()
 
-        with autocast():
+        with autocast(device_type="cuda"):
             out1 = m1(imgs)
             out2 = m2(imgs)
             p1 = accuracy(out1, labs)[0]
