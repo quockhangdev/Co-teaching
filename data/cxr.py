@@ -5,6 +5,7 @@ import torch.utils.data as data
 import numpy as np
 from .utils import noisify
 
+
 class CXR(data.Dataset):
     """
     Dataset `CXR` với cấu trúc thư mục:
@@ -37,6 +38,7 @@ class CXR(data.Dataset):
         noise_or_not (np.ndarray): Mask mẫu nào giữ nhãn gốc.
         nb_classes (int): Số class trong dataset.
     """
+
     def __init__(
         self,
         root,
@@ -71,7 +73,9 @@ class CXR(data.Dataset):
             folder = os.path.join(self.split_dir, cls)
             for fn in os.listdir(folder):
                 if fn.lower().endswith((".jpg", ".jpeg", ".png", ".bmp", ".gif")):
-                    self.samples.append((os.path.join(folder, fn), self.class_to_idx[cls]))
+                    self.samples.append(
+                        (os.path.join(folder, fn), self.class_to_idx[cls])
+                    )
 
         # Số class
         self.nb_classes = len(self.classes)
@@ -122,6 +126,7 @@ class CXR(data.Dataset):
         s += f"    Classes ({self.nb_classes}): {self.classes}\n"
         s += f"    Noise: {self.noise_type} @ {self.noise_rate} (actual {self.actual_noise_rate:.3f})\n"
         return s
+
 
 # Example usage:
 # from torchvision import transforms
