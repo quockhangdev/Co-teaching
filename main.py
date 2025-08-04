@@ -113,6 +113,11 @@ if os.path.exists(txtfile):
 def accuracy(logit, target, topk=(1,)):
     _, pred = logit.topk(max(topk), 1, True, True)
     correct = pred.t().eq(target.view(1, -1).expand_as(pred))
+
+    print(f"logit shape: {logit.shape}")
+    print(f"target shape: {target.shape}")
+    print(f"pred shape: {pred.shape}")
+
     res = [
         correct[:k].reshape(-1).float().sum(0).mul_(100.0 / target.size(0))
         for k in topk
